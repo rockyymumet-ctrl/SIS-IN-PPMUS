@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi Santri & Administrasi Pesantren</title>
+  <!-- Tailwind CSS Framework -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea *, #printableReceipt, #printableReceipt * { visibility: visible; }
+      #printableArea, #printableReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-emerald-950/10 min-h-screen text-slate-800 flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="bg-emerald-800 text-white shadow-lg border-b border-emerald-700 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <!-- Logo Pesantren Interaktif -->
+        <div class="relative group cursor-pointer" onclick="document.getElementById('inputHeaderLogo').click()" title="Klik untuk mengganti logo header">
+          <div class="bg-white p-1 rounded-full shadow-md border-2 border-emerald-400 flex items-center justify-center shrink-0 w-12 h-12 md:w-14 md:h-14 overflow-hidden">
+            <img id="headerLogoImg" src="" alt="Logo PON. PES Miftahul Ulum" class="w-full h-full object-contain rounded-full">
+          </div>
+          <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-camera text-white text-xs"></i>
+          </div>
+        </div>
+        <input type="file" id="inputHeaderLogo" accept="image/*" class="hidden" onchange="changeHeaderLogo(this)">
+
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl md:text-2xl font-bold tracking-wide">Sistem Informasi Pesantren</h1>
+            <button onclick="document.getElementById('inputHeaderLogo').click()" class="text-[10px] bg-emerald-700 hover:bg-emerald-600 px-2 py-0.5 rounded text-emerald-100 transition border border-emerald-500/40" title="Ganti Logo">
+              <i class="fa-solid fa-pen-to-square me-1"></i>Ganti Logo
+            </button>
+          </div>
+          <p class="text-xs text-emerald-200">PON. PES MIFTAHUL ULUM - Sistem Informasi Santri & Administrasi Pesantren</p>
+        </div>
+      </div>
+
+      <div class="bg-emerald-900/50 px-4 py-1.5 rounded-full text-xs font-medium text-emerald-100 border border-emerald-700/50 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Terhubung ke Cloud & Storage Lokal
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+    <div id="toast-notification" class="hidden mb-4 p-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-between shadow-sm">
+      <span id="toast-message"></span>
+      <button onclick="closeToast()" class="ml-4 font-bold opacity-75 hover:opacity-100">&times;</button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white p-2 rounded-2xl shadow-sm border border-emerald-100 mb-6 flex flex-wrap gap-2">
+      <button id="btn-tab-struktur" onclick="switchTab('struktur')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 bg-emerald-700 text-white shadow-sm">
+        <i class="fa-solid fa-sitemap"></i>
+        <span>1. Pengurus</span>
+      </button>
+      <button id="btn-tab-pengajar" onclick="switchTab('pengajar')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <span>2. Tenaga Pengajar</span>
+      </button>
+      <button id="btn-tab-pendaftaran" onclick="switchTab('pendaftaran')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>3. Pendaftaran</span>
+      </button>
+      <button id="btn-tab-data-santri" onclick="switchTab('data-santri')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-users"></i>
+        <span>4. Data Santri</span>
+      </button>
+      <button id="btn-tab-pembayaran" onclick="switchTab('pembayaran')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+        <span>5. Pembayaran</span>
+      </button>
+      <button id="btn-tab-absensi" onclick="switchTab('absensi')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-clipboard-user"></i>
+        <span>6. Absensi & Izin</span>
+      </button>
+      <button id="btn-tab-hafalan" onclick="switchTab('hafalan')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-trophy"></i>
+        <span>7. Prestasi</span>
+      </button>
+      <button id="btn-tab-pelanggaran" onclick="switchTab('pelanggaran')" class="tab-btn flex-1 min-w-[120px] py-2.5 px-3 rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 flex items-center justify-center gap-2 text-slate-600 hover:bg-emerald-50 hover:text-emerald-800">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span>8. Pelanggaran</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: STRUKTUR PENGURUS -->
+    <div id="tab-struktur" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+            <i class="fa-solid fa-sitemap text-emerald-600"></i>
+            Struktur Pengurus & Profil PP. Miftahul Ulum
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Susunan pengasuh dan pengurus utama pondok pesantren.</p>
+        </div>
+        <button onclick="bukaModalEditPengurus()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-pen-to-square"></i> Edit Nama / Profil
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="containerPengurus">
+        <div class="bg-gradient-to-b from-emerald-800 to-emerald-900 text-white rounded-2xl p-5 shadow-md flex flex-col items-center text-center space-y-3 border-2 border-emerald-500 relative">
+          <span class="absolute top-3 right-3 bg-emerald-400 text-emerald-950 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Pengasuh</span>
+          <div class="w-24 h-24 rounded-full bg-white/10 border-2 border-emerald-300 p-1 overflow-hidden relative group cursor-pointer" onclick="triggerGantiFotoPengurus('pengasuh')">
+            <img id="img-pengasuh" src="" class="w-full h-full object-cover rounded-full hidden">
+            <div id="icon-pengasuh" class="w-full h-full flex items-center justify-center text-3xl text-emerald-200"><i class="fa-solid fa-user-tie"></i></div>
+            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-xs"></i></div>
+          </div>
+          <div>
+            <p class="text-xs text-emerald-300 font-semibold uppercase tracking-wider">Pengasuh Pesantren</p>
+            <h3 class="font-bold text-base text-white mt-1" id="nama-pengasuh">KY. H. ABDUL HAFIDZ</h3>
+            <p class="text-[11px] text-emerald-200 mt-1 leading-relaxed">Membimbing, mengayomi, dan memimpin arah pendidikan pondok pesantren.</p>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 rounded-2xl p-5 shadow-sm border border-emerald-200 flex flex-col items-center text-center space-y-3 relative">
+          <span class="absolute top-3 right-3 bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Pengurus</span>
+          <div class="w-24 h-24 rounded-full bg-emerald-100 border-2 border-emerald-400 p-1 overflow-hidden relative group cursor-pointer" onclick="triggerGantiFotoPengurus('pengurus')">
+            <img id="img-pengurus" src="" class="w-full h-full object-cover rounded-full hidden">
+            <div id="icon-pengurus" class="w-full h-full flex items-center justify-center text-3xl text-emerald-700"><i class="fa-solid fa-user-gear"></i></div>
+            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-xs text-white"></i></div>
+          </div>
+          <div>
+            <p class="text-xs text-emerald-700 font-semibold uppercase tracking-wider">Ketua / Pengurus</p>
+            <h3 class="font-bold text-base text-slate-800 mt-1" id="nama-pengurus">AHMAD ZAINUR ROSYID</h3>
+            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Mengordinasikan seluruh kegiatan harian dan operasional santri.</p>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 rounded-2xl p-5 shadow-sm border border-emerald-200 flex flex-col items-center text-center space-y-3 relative">
+          <span class="absolute top-3 right-3 bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Sekretaris</span>
+          <div class="w-24 h-24 rounded-full bg-emerald-100 border-2 border-emerald-400 p-1 overflow-hidden relative group cursor-pointer" onclick="triggerGantiFotoPengurus('sekretaris')">
+            <img id="img-sekretaris" src="" class="w-full h-full object-cover rounded-full hidden">
+            <div id="icon-sekretaris" class="w-full h-full flex items-center justify-center text-3xl text-emerald-700"><i class="fa-solid fa-user-pen"></i></div>
+            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-xs text-white"></i></div>
+          </div>
+          <div>
+            <p class="text-xs text-emerald-700 font-semibold uppercase tracking-wider">Sekretaris Pondok</p>
+            <h3 class="font-bold text-base text-slate-800 mt-1" id="nama-sekretaris">BAGUS ANTONI</h3>
+            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Mengelola administrasi, persuratan, dan pendataan santri.</p>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50 rounded-2xl p-5 shadow-sm border border-emerald-200 flex flex-col items-center text-center space-y-3 relative">
+          <span class="absolute top-3 right-3 bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Bendahara</span>
+          <div class="w-24 h-24 rounded-full bg-emerald-100 border-2 border-emerald-400 p-1 overflow-hidden relative group cursor-pointer" onclick="triggerGantiFotoPengurus('bendahara')">
+            <img id="img-bendahara" src="" class="w-full h-full object-cover rounded-full hidden">
+            <div id="icon-bendahara" class="w-full h-full flex items-center justify-center text-3xl text-emerald-700"><i class="fa-solid fa-wallet"></i></div>
+            <div class="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-camera text-xs text-white"></i></div>
+          </div>
+          <div>
+            <p class="text-xs text-emerald-700 font-semibold uppercase tracking-wider">Bendahara / Syahriah</p>
+            <h3 class="font-bold text-base text-slate-800 mt-1" id="nama-bendahara">FERLY ROFIANSYAH</h3>
+            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Mengatur administrasi keuangan, SPP kos, dan syahriah santri.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TENAGA PENGAJAR -->
+    <div id="tab-pengajar" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="border-b border-slate-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+          <i class="fa-solid fa-chalkboard-user text-emerald-600"></i>
+          Data Tenaga Pengajar PONPES Miftahul Ulum
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Kelola data Ustaz/Ustazah, pengampu mata pelajaran, dan kontak pendidik.</p>
+      </div>
+
+      <form id="form-pengajar" class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Tambah Data Tenaga Pengajar</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Ustaz / Ustazah *</label>
+            <input type="text" id="pengajarNama" placeholder="Contoh: Ust. Ahmad, S.Pd." required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Mata Pelajaran / Kitab *</label>
+            <input type="text" id="pengajarMapel" placeholder="Contoh: Nahwu / Fiqih" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pendidikan Terakhir *</label>
+            <input type="text" id="pengajarPendidikan" placeholder="Contoh: S1 Pendidikan Islam" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp / HP *</label>
+            <input type="tel" id="pengajarHp" placeholder="Contoh: 081234567890" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i>
+            Tambah Tenaga Pengajar
+          </button>
+        </div>
+      </form>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-emerald-800 text-white">
+              <th class="p-3 font-semibold">Nama Pengajar</th>
+              <th class="p-3 font-semibold">Mengampu Kitab / Mapel</th>
+              <th class="p-3 font-semibold">Pendidikan</th>
+              <th class="p-3 font-semibold">No. WA / HP</th>
+              <th class="p-3 font-semibold text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabelPengajar" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: PENDAFTARAN SANTRI -->
+    <div id="tab-pendaftaran" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="border-b border-slate-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+          <i class="fa-solid fa-file-pen text-emerald-600"></i>
+          Formulir Pendaftaran Santri Baru
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Lengkapi seluruh data di bawah ini untuk mencatatkan santri baru ke dalam sistem.</p>
+      </div>
+
+      <form id="form-pendaftaran" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Lengkap Santri *</label>
+            <input type="text" id="regNama" placeholder="Contoh: Ahmad Abdullah" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">NIK / NISN *</label>
+            <input type="number" id="regNik" placeholder="Contoh: 3201234567890001" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Jenis Kelamin *</label>
+            <select id="regJk" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+              <option value="Laki-Laki">Laki-Laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tempat Lahir *</label>
+            <input type="text" id="regTempatLahir" placeholder="Contoh: Lumajang" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tanggal Lahir Santri *</label>
+            <div class="grid grid-cols-3 gap-2">
+              <select id="regTglLahir" required class="border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="">-- Tanggal --</option></select>
+              <select id="regBlnLahir" required class="border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                <option value="">-- Bulan --</option>
+                <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
+                <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
+                <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+                <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+              </select>
+              <select id="regThnLahir" required class="border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="">-- Tahun --</option></select>
+            </div>
+          </div>
+
+          <div class="md:col-span-2 lg:col-span-3 bg-emerald-50/40 p-4 rounded-xl border border-emerald-100">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tanggal Masuk / Pendaftaran Santri *</label>
+            <div class="grid grid-cols-3 gap-3 max-w-md">
+              <select id="regTglMasuk" required class="border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="">-- Tanggal --</option></select>
+              <select id="regBlnMasuk" required class="border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+                <option value="">-- Bulan --</option>
+                <option value="01">Januari</option><option value="02">Februari</option><option value="03">Maret</option>
+                <option value="04">April</option><option value="05">Mei</option><option value="06">Juni</option>
+                <option value="07">Juli</option><option value="08">Agustus</option><option value="09">September</option>
+                <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+              </select>
+              <select id="regThnMasuk" required class="border border-slate-300 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none bg-white"><option value="">-- Tahun --</option></select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kompleks / Asrama *</label>
+            <input type="text" id="regKompleks" placeholder="Contoh: Asrama Al-Mubarok" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Alokasi Kamar Kos / Pondok *</label>
+            <input type="text" id="regKamar" placeholder="Contoh: Kamar Syahriah 04" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nama Wali / Orang Tua *</label>
+            <input type="text" id="regWali" placeholder="Contoh: Bpk. Rahmat" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">No. WhatsApp Wali (08xx / 628xx) *</label>
+            <input type="tel" id="regHp" placeholder="Contoh: 081234567890" required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+
+          <div class="md:col-span-2 lg:col-span-2 bg-emerald-50/50 p-4 rounded-xl border border-emerald-200">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Foto Santri (Opsional)</label>
+            <input type="file" id="regFoto" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-700 file:text-white hover:file:bg-emerald-800 cursor-pointer">
+          </div>
+
+          <div class="md:col-span-2 lg:col-span-3">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Alamat Lengkap Santri *</label>
+            <textarea id="regAlamat" rows="2" placeholder="Contoh: Dusun Krajan RT 02 RW 01, Sukorejo, Kunir, Lumajang..." required class="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-6 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            Simpan Pendaftaran Santri (Ke Cloud)
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TAB 4: DATA SANTRI -->
+    <div id="tab-data-santri" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 mb-6 gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+            <i class="fa-solid fa-address-book text-emerald-600"></i>
+            Daftar Santri Terdaftar
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Data riwayat seluruh santri PON. PES Miftahul Ulum.</p>
+        </div>
+        <div class="w-full md:w-auto flex flex-wrap items-center gap-2">
+          <button onclick="exportToCSV('santri')" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-file-csv"></i> Export Excel/CSV
+          </button>
+          <div class="relative w-full md:w-56">
+            <input type="text" id="searchSantri" onkeyup="filterSantri()" placeholder="Cari santri/kamar..." class="w-full border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-emerald-800 text-white">
+              <th class="p-3 font-semibold text-center">Foto</th>
+              <th class="p-3 font-semibold">ID Santri</th>
+              <th class="p-3 font-semibold">Nama Santri & NIK/NIS</th>
+              <th class="p-3 font-semibold">TTL</th>
+              <th class="p-3 font-semibold">Tgl Masuk</th>
+              <th class="p-3 font-semibold">Asrama / Kamar</th>
+              <th class="p-3 font-semibold">Alamat</th>
+              <th class="p-3 font-semibold">Wali & No. HP</th>
+              <th class="p-3 font-semibold text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabelSantri" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 5: PEMBAYARAN -->
+    <div id="tab-pembayaran" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-100 pb-4 mb-6 gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-emerald-600"></i>
+            Pencatatan Pembayaran Kos & Syahriah
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">Kelola tagihan pendaftaran dan SPP bulanan santri.</p>
+        </div>
+        <div class="w-full md:w-auto flex flex-wrap items-center gap-2">
+          <button onclick="exportToCSV('pembayaran')" class="bg-slate-700 hover:bg-slate-800 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-file-csv"></i> Export Transaksi
+          </button>
+          <div class="relative w-full md:w-56">
+            <input type="text" id="searchPembayaran" onkeyup="filterPembayaran()" placeholder="Cari transaksi..." class="w-full border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+          <p class="text-xs font-medium text-emerald-700">Total Transaksi Lunas</p>
+          <p id="stat-total-lunas" class="text-lg font-bold text-emerald-900 mt-1">Rp 0</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+          <p class="text-xs font-medium text-amber-700">Total Belum Lunas</p>
+          <p id="stat-total-pending" class="text-lg font-bold text-amber-900 mt-1">Rp 0</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl sm:col-span-2 lg:col-span-1">
+          <p class="text-xs font-medium text-slate-600">Total Santri Terdaftar</p>
+          <p id="stat-total-santri" class="text-lg font-bold text-slate-800 mt-1">0 Santri</p>
+        </div>
+      </div>
+
+      <form id="form-pembayaran" class="bg-slate-50 p-4 md:p-5 rounded-xl border border-slate-200 mb-6 space-y-4">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Input Transaksi Baru</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Santri *</label>
+            <select id="payNama" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Pembayaran *</label>
+            <select id="payJenis" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="PENDAFTARAN">PENDAFTARAN</option>
+              <option value="SPP BULAN SABEL">SPP BULAN SABEL</option>
+              <option value="SPP BULAN TEKEPEK">SPP BULAN TEKEPEK</option>
+              <option value="SPP BULAN LERAJEH">SPP BULAN LERAJEH</option>
+              <option value="SPP BULAN SORAH">SPP BULAN SORAH</option>
+              <option value="SPP BULAN SAPPAR">SPP BULAN SAPPAR</option>
+              <option value="SPP BULAN MAULID">SPP BULAN MAULID</option>
+              <option value="SPP BULAN RASOL">SPP BULAN RASOL</option>
+              <option value="SPP BULAN MANDIWEL">SPP BULAN MANDIWEL</option>
+              <option value="SPP BULAN MANDILAHER">SPP BULAN MANDILAHER</option>
+              <option value="SPP BULAN REJEB">SPP BULAN REJEB</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Pembayaran (Rp) *</label>
+            <input type="number" id="payNominal" placeholder="Contoh: 750000" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Status Pembayaran *</label>
+            <select id="payStatus" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="Lunas">Lunas</option>
+              <option value="Belum Lunas">Belum Lunas</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end pt-2">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-5 py-2.5 rounded-lg text-xs transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            Catat Pembayaran (Ke Cloud)
+          </button>
+        </div>
+      </form>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-emerald-800 text-white">
+              <th class="p-3 font-semibold">ID Transaksi</th>
+              <th class="p-3 font-semibold">Nama Santri</th>
+              <th class="p-3 font-semibold">Jenis Pembayaran</th>
+              <th class="p-3 font-semibold">Nominal</th>
+              <th class="p-3 font-semibold">Status</th>
+              <th class="p-3 font-semibold text-center">Aksi / Struk</th>
+            </tr>
+          </thead>
+          <tbody id="tabelPembayaran" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 6: ABSENSI & PERIZINAN PULANG -->
+    <div id="tab-absensi" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="border-b border-slate-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-user text-emerald-600"></i>
+          Pencatatan Absensi Harian & Perizinan Pulang Santri
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Kelola presensi kegiatan dan surat izin keluar/pulang santri.</p>
+      </div>
+
+      <form id="form-perizinan" class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Formulir Izin Pulang / Keluar Santri</h3>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Santri *</label>
+            <select id="izinSantri" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Alasan Izin *</label>
+            <input type="text" id="izinAlasan" placeholder="Contoh: Acara Keluarga / Sakit" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Keluar *</label>
+            <input type="date" id="izinTglKeluar" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Batas Kembali *</label>
+            <input type="date" id="izinTglKembali" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            Simpan & Terbitkan Izin
+          </button>
+        </div>
+      </form>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-emerald-800 text-white">
+              <th class="p-3 font-semibold">Nama Santri</th>
+              <th class="p-3 font-semibold">Alasan</th>
+              <th class="p-3 font-semibold">Tgl Keluar</th>
+              <th class="p-3 font-semibold">Batas Kembali</th>
+              <th class="p-3 font-semibold">Status</th>
+              <th class="p-3 font-semibold text-center">Aksi / Kirim WA</th>
+            </tr>
+          </thead>
+          <tbody id="tabelPerizinan" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 7: PRESTASI & HAFALAN -->
+    <div id="tab-hafalan" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="border-b border-slate-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-emerald-900 flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-500"></i>
+          Pencatatan Prestasi & Hafalan Santri
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Pantau pencapaian prestasi akademik, lomba, hafalan Al-Qur'an & kitab santri.</p>
+      </div>
+
+      <form id="form-hafalan" class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Santri *</label>
+            <select id="hafalanSantri" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Prestasi / Hafalan *</label>
+            <select id="hafalanKategori" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+              <option value="Prestasi / Lomba Akademik">Prestasi / Lomba Akademik</option>
+              <option value="Prestasi Non-Akademik / Seni">Prestasi Non-Akademik / Seni</option>
+              <option value="Al-Qur'an (Juz / Surah)">Al-Qur'an (Juz / Surah)</option>
+              <option value="Kitab Aqidatul Awam">Kitab Aqidatul Awam</option>
+              <option value="Kitab Imrithi">Kitab Imrithi</option>
+              <option value="Kitab Alfiyah Ibn Malik">Kitab Alfiyah Ibn Malik</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Capaian / Prestasi *</label>
+            <input type="text" id="hafalanCapaian" placeholder="Contoh: Juara 1 MQK / Setoran Juz 30" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-trophy"></i>
+            Tambah Catatan Prestasi
+          </button>
+        </div>
+      </form>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-emerald-800 text-white">
+              <th class="p-3 font-semibold">Tgl Catat</th>
+              <th class="p-3 font-semibold">Nama Santri</th>
+              <th class="p-3 font-semibold">Kategori</th>
+              <th class="p-3 font-semibold">Capaian Prestasi</th>
+              <th class="p-3 font-semibold text-center">Aksi / Kirim WA</th>
+            </tr>
+          </thead>
+          <tbody id="tabelHafalan" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 8: PELANGGARAN & POIN -->
+    <div id="tab-pelanggaran" class="tab-content bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-emerald-100 hidden">
+      <div class="border-b border-slate-100 pb-4 mb-6">
+        <h2 class="text-xl font-bold text-rose-900 flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+          Pencatatan Kedisiplinan & Pelanggaran Santri
+        </h2>
+        <p class="text-xs text-slate-500 mt-1">Sistem poin pelanggaran dan tindakan ta'zir pengurus kedisiplinan.</p>
+      </div>
+
+      <form id="form-pelanggaran" class="bg-rose-50/50 p-4 rounded-xl border border-rose-200 mb-6 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Santri *</label>
+            <select id="pelanggaranSantri" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Pelanggaran *</label>
+            <input type="text" id="pelanggaranDeskripsi" placeholder="Contoh: Terlambat Berjamaah" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Poin Pelanggaran *</label>
+            <input type="number" id="pelanggaranPoin" placeholder="Contoh: 5" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tindakan / Ta'zir *</label>
+            <input type="text" id="pelanggaranTazir" placeholder="Contoh: Membaca Al-Qur'an 1 Juz" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs bg-white outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="bg-rose-700 hover:bg-rose-800 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            Catat Pelanggaran
+          </button>
+        </div>
+      </form>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-200">
+        <table class="w-full text-left border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-rose-900 text-white">
+              <th class="p-3 font-semibold">Tgl Kejadian</th>
+              <th class="p-3 font-semibold">Nama Santri</th>
+              <th class="p-3 font-semibold">Pelanggaran</th>
+              <th class="p-3 font-semibold">Poin</th>
+              <th class="p-3 font-semibold">Tindakan (Ta'zir)</th>
+              <th class="p-3 font-semibold text-center">Aksi / Kirim WA</th>
+            </tr>
+          </thead>
+          <tbody id="tabelPelanggaran" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL EDIT DATA SANTRI -->
+  <div id="modalEditSantri" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-emerald-900 text-base flex items-center gap-2">
+          <i class="fa-solid fa-user-pen text-emerald-600"></i> Edit Data Santri & No. HP/NIK
+        </h3>
+        <button onclick="closeModalEditSantri()" class="text-slate-400 font-bold text-xl hover:text-slate-600">&times;</button>
+      </div>
+      <form id="formEditSantri" class="space-y-3">
+        <input type="hidden" id="editSantriId">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Santri *</label>
+          <input type="text" id="editSantriNama" required class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">NIK / NISN *</label>
+          <input type="number" id="editSantriNik" required class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tempat Lahir</label>
+            <input type="text" id="editSantriTempatLahir" class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Lahir</label>
+            <input type="text" id="editSantriTglLahir" class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Kompleks / Asrama</label>
+            <input type="text" id="editSantriKompleks" class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Kamar Kos</label>
+            <input type="text" id="editSantriKamar" class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Wali *</label>
+          <input type="text" id="editSantriWali" required class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp / HP Wali *</label>
+          <input type="tel" id="editSantriHp" required class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Alamat Lengkap</label>
+          <textarea id="editSantriAlamat" rows="2" class="w-full border rounded-lg p-2.5 text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-3 border-t">
+          <button type="button" onclick="closeModalEditSantri()" class="px-3.5 py-2 rounded-xl text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium">Batal</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT PENGURUS -->
+  <div id="modalEditPengurus" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-emerald-900 text-base">Edit Nama Struktur Pengurus</h3>
+        <button onclick="closeModalEditPengurus()" class="text-slate-400 font-bold">&times;</button>
+      </div>
+      <form id="formEditPengurus" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pengasuh</label>
+          <input type="text" id="editNamaPengasuh" class="w-full border rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Pengurus</label>
+          <input type="text" id="editNamaPengurus" class="w-full border rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Sekretaris</label>
+          <input type="text" id="editNamaSekretaris" class="w-full border rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Bendahara</label>
+          <input type="text" id="editNamaBendahara" class="w-full border rounded-lg p-2 text-xs outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModalEditPengurus()" class="px-3 py-1.5 rounded-lg text-xs bg-slate-200 text-slate-700">Batal</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg text-xs bg-emerald-700 text-white font-semibold">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CETAK KTS -->
+  <div id="modalCetakKTS" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-emerald-900 text-base">Cetak Kartu Tanda Santri</h3>
+        <button onclick="closeKtsModal()" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+      </div>
+
+      <div id="printableArea" class="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white p-5 rounded-2xl border-2 border-emerald-400 shadow-xl space-y-4">
+        <div class="flex items-center gap-3 border-b border-emerald-600/60 pb-3">
+          <div class="w-10 h-10 bg-white rounded-full p-1 shrink-0">
+            <img id="ktsHeaderLogo" src="" class="w-full h-full object-contain rounded-full">
+          </div>
+          <div>
+            <p class="font-bold text-xs uppercase tracking-wider text-emerald-200">KARTU TANDA SANTRI</p>
+            <p class="font-bold text-sm">PON. PES MIFTAHUL ULUM</p>
+            <p class="text-[9px] text-emerald-300">Sukorejo, Kunir, Lumajang</p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 items-center">
+          <div class="w-20 h-24 bg-white/10 rounded-xl overflow-hidden border border-emerald-400/50 shrink-0 flex items-center justify-center">
+            <img id="ktsFoto" class="w-full h-full object-cover hidden">
+            <i id="ktsIcon" class="fa-solid fa-user text-3xl text-emerald-300"></i>
+          </div>
+          <div class="space-y-1 text-xs">
+            <p class="text-[10px] text-emerald-300 font-mono" id="ktsId">ID: -</p>
+            <p class="font-bold text-sm text-white" id="ktsNama">-</p>
+            <p class="text-[11px] text-emerald-100"><i class="fa-solid fa-cake-candles me-1"></i><span id="ktsTtl">-</span></p>
+            <p class="text-[11px] text-emerald-100"><i class="fa-solid fa-house me-1"></i><span id="ktsKamar">-</span></p>
+            <p class="text-[11px] text-emerald-100"><i class="fa-solid fa-calendar-check me-1"></i>Masuk: <span id="ktsMasuk">-</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeKtsModal()" class="px-4 py-2 rounded-xl text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold">Tutup</button>
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i> Cetak Kartu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CETAK STRUK PEMBAYARAN -->
+  <div id="modalCetakStruk" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm">Bukti Pembayaran / Kwitansi</h3>
+        <button onclick="closeStrukModal()" class="text-slate-400 font-bold">&times;</button>
+      </div>
+
+      <div id="printableReceipt" class="border border-slate-300 p-4 rounded-xl space-y-3 text-xs bg-slate-50">
+        <div class="text-center border-b border-dashed border-slate-300 pb-2">
+          <p class="font-bold text-sm text-emerald-900">PON. PES MIFTAHUL ULUM</p>
+          <p class="text-[10px] text-slate-500">KWITANSI PEMBAYARAN SYAHRIAH</p>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between"><span class="text-slate-500">No. Trx:</span><span id="stTrx" class="font-mono font-bold"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Nama Santri:</span><span id="stNama" class="font-bold"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Jenis Bayar:</span><span id="stJenis"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Nominal:</span><span id="stNominal" class="font-bold text-emerald-800"></span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Status:</span><span id="stStatus" class="font-semibold"></span></div>
+        </div>
+        <div class="border-t border-dashed border-slate-300 pt-2 text-[10px] text-center text-slate-400">
+          Terima kasih. Simpan kwitansi ini sebagai bukti pembayaran sah.
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="closeStrukModal()" class="px-3 py-1.5 rounded-lg text-xs bg-slate-200">Tutup</button>
+        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg text-xs bg-emerald-700 text-white font-semibold"><i class="fa-solid fa-print me-1"></i> Cetak Struk</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="inputFotoSantriTabel" accept="image/*" class="hidden" onchange="prosesGantiFotoTabel(event)">
+  <input type="file" id="inputFotoPengurus" accept="image/*" class="hidden" onchange="prosesGantiFotoPengurus(event)">
+
+  <footer class="bg-slate-900 text-slate-400 text-xs py-4 text-center border-t border-slate-800">
+    <p>&copy; 2026 PON. PES MIFTAHUL ULUM SUKOREJO KUNIR. Hak Cipta Dilindungi.</p>
+  </footer>
+
+  <script>
+    // --- MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI ---
+    const GOOGLE_SCRIPT_URL = "TEMPELKAN_URL_GOOGLE_APPS_SCRIPT_DI_SINI";
+
+    // Fungsi Pengiriman Data ke Google Sheets
+    function kirimDataKeGoogleSheets(actionType, payload) {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("TEMPELKAN_URL")) {
+        console.warn("URL Google Sheets belum diatur.");
+        return;
+      }
+      showToast('Mengirim data ke Google Cloud Database...', 'info');
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.assign({ action: actionType }, payload))
+      })
+      .then(() => {
+        showToast('Data tersimpan secara otomatis di Google Cloud Database!', 'success');
+      })
+      .catch(err => {
+        showToast('Gagal mengirim ke cloud database: ' + err, 'error');
+      });
+    }
+
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+      if (!file) { callback(''); return; }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let width = img.width; let height = img.height;
+          if (width > height) {
+            if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+          } else {
+            if (height > maxHeight) { width = Math.round((width * maxHeight) / height); height = maxHeight; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    let santriData = JSON.parse(localStorage.getItem('kos_santri_data')) || [
+      { id: 'STR-001', nama: 'Ahmad Fauzi', nik: '3171012345670001', jk: 'Laki-Laki', tempatLahir: 'Lumajang', tglLahir: '15-05-2008', tglMasuk: '01-07-2024', kompleks: 'Asrama Al-Mubarok', kamar: 'Kamar Syahriah 01', alamat: 'Jl. Merdeka No. 45, Lumajang', wali: 'Bpk. Abdullah', hp: '081234567890', foto: '' }
+    ];
+
+    let pembayaranData = JSON.parse(localStorage.getItem('kos_pembayaran_data')) || [
+      { idTrx: 'TRX-101', nama: 'Ahmad Fauzi', jenis: 'SPP BULAN SABEL', nominal: 800000, status: 'Lunas' }
+    ];
+
+    let hafalanData = JSON.parse(localStorage.getItem('kos_hafalan_data')) || [];
+    let pelanggaranData = JSON.parse(localStorage.getItem('kos_pelanggaran_data')) || [];
+    let perizinanData = JSON.parse(localStorage.getItem('kos_perizinan_data')) || [];
+    let pengajarData = JSON.parse(localStorage.getItem('kos_pengajar_data')) || [
+      { nama: 'Ust. Ahmad Zainul, S.Pd.', mapel: 'Nahwu & Shorof', pendidikan: 'S1 Pendidikan Bahasa Arab', hp: '081234567891' }
+    ];
+
+    let pengurusData = JSON.parse(localStorage.getItem('kos_pengurus_data')) || {
+      pengasuh: { nama: 'KY. H. ABDUL HAFIDZ', foto: '' },
+      pengurus: { nama: 'AHMAD ZAINUR ROSYID', foto: '' },
+      sekretaris: { nama: 'BAGUS ANTONI', foto: '' },
+      bendahara: { nama: 'FERLY ROFIANSYAH', foto: '' }
+    };
+
+    let santriCounter = parseInt(localStorage.getItem('kos_santri_counter')) || 2;
+    let trxCounter = parseInt(localStorage.getItem('kos_trx_counter')) || 102;
+    let currentSantriIdForPhoto = null;
+    let currentPengurusRoleForPhoto = null;
+
+    function saveDataToStorage() {
+      try {
+        localStorage.setItem('kos_santri_data', JSON.stringify(santriData));
+        localStorage.setItem('kos_pembayaran_data', JSON.stringify(pembayaranData));
+        localStorage.setItem('kos_hafalan_data', JSON.stringify(hafalanData));
+        localStorage.setItem('kos_pelanggaran_data', JSON.stringify(pelanggaranData));
+        localStorage.setItem('kos_perizinan_data', JSON.stringify(perizinanData));
+        localStorage.setItem('kos_pengurus_data', JSON.stringify(pengurusData));
+        localStorage.setItem('kos_pengajar_data', JSON.stringify(pengajarData));
+        localStorage.setItem('kos_santri_counter', santriCounter);
+        localStorage.setItem('kos_trx_counter', trxCounter);
+      } catch (err) {
+        showToast('Memori lokal penuh.', 'error');
+      }
+    }
+
+    function initDropdownOptions() {
+      const selectTglLahir = document.getElementById('regTglLahir');
+      const selectTglMasuk = document.getElementById('regTglMasuk');
+      for (let i = 1; i <= 31; i++) {
+        const val = String(i).padStart(2, '0');
+        selectTglLahir.innerHTML += `<option value="${val}">${val}</option>`;
+        selectTglMasuk.innerHTML += `<option value="${val}">${val}</option>`;
+      }
+      const selectThnLahir = document.getElementById('regThnLahir');
+      for (let y = 2026; y >= 1990; y--) selectThnLahir.innerHTML += `<option value="${y}">${y}</option>`;
+      const selectThnMasuk = document.getElementById('regThnMasuk');
+      for (let y = 2026; y >= 2015; y--) selectThnMasuk.innerHTML += `<option value="${y}">${y}</option>`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initDropdownOptions();
+      const savedHeaderLogo = localStorage.getItem('kos_header_logo');
+      if (savedHeaderLogo) {
+        document.getElementById('headerLogoImg').src = savedHeaderLogo;
+        document.getElementById('ktsHeaderLogo').src = savedHeaderLogo;
+      }
+
+      renderSantriTable();
+      renderPembayaranTable();
+      renderHafalanTable();
+      renderPelanggaranTable();
+      renderPerizinanTable();
+      renderPengurusView();
+      renderPengajarTable();
+      populateSantriDropdowns();
+      updateStats();
+
+      document.getElementById('form-pendaftaran').addEventListener('submit', handlePendaftaran);
+      document.getElementById('form-pembayaran').addEventListener('submit', handlePembayaran);
+      document.getElementById('form-hafalan').addEventListener('submit', handleHafalan);
+      document.getElementById('form-pelanggaran').addEventListener('submit', handlePelanggaran);
+      document.getElementById('form-perizinan').addEventListener('submit', handlePerizinan);
+      document.getElementById('form-pengajar').addEventListener('submit', handlePengajar);
+      document.getElementById('formEditPengurus').addEventListener('submit', handleSavePengurus);
+      document.getElementById('formEditSantri').addEventListener('submit', handleSaveEditSantri);
+    });
+
+    function changeHeaderLogo(input) {
+      if (input.files && input.files[0]) {
+        compressImage(input.files[0], 300, 300, 0.7, function(compressedBase64) {
+          document.getElementById('headerLogoImg').src = compressedBase64;
+          document.getElementById('ktsHeaderLogo').src = compressedBase64;
+          localStorage.setItem('kos_header_logo', compressedBase64);
+        });
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-700', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'hover:bg-emerald-50', 'hover:text-emerald-800');
+      });
+      const selectedContent = document.getElementById(`tab-${tabName}`);
+      if (selectedContent) selectedContent.classList.remove('hidden');
+      const selectedBtn = document.getElementById(`btn-tab-${tabName}`);
+      if (selectedBtn) {
+        selectedBtn.classList.remove('text-slate-600', 'hover:bg-emerald-50', 'hover:text-emerald-800');
+        selectedBtn.classList.add('bg-emerald-700', 'text-white', 'shadow-sm');
+      }
+    }
+
+    function handlePendaftaran(e) {
+      e.preventDefault();
+      const nama = document.getElementById('regNama').value.trim();
+      const nik = document.getElementById('regNik').value.trim();
+      const jk = document.getElementById('regJk').value;
+      const tempatLahir = document.getElementById('regTempatLahir').value.trim();
+      const tglLahir = `${document.getElementById('regTglLahir').value}-${document.getElementById('regBlnLahir').value}-${document.getElementById('regThnLahir').value}`;
+      const tglMasuk = `${document.getElementById('regTglMasuk').value}-${document.getElementById('regBlnMasuk').value}-${document.getElementById('regThnMasuk').value}`;
+      const kompleks = document.getElementById('regKompleks').value.trim();
+      const kamar = document.getElementById('regKamar').value.trim();
+      const wali = document.getElementById('regWali').value.trim();
+      const hp = document.getElementById('regHp').value.trim();
+      const alamat = document.getElementById('regAlamat').value.trim();
+      const fotoInput = document.getElementById('regFoto');
+
+      const processRegistration = (fotoBase64) => {
+        const newId = 'STR-' + String(santriCounter++).padStart(3, '0');
+        const santriPayload = { id: newId, nama, nik, jk, tempatLahir, tglLahir, tglMasuk, kompleks, kamar, alamat, wali, hp, foto: fotoBase64 };
+        
+        santriData.push(santriPayload);
+        saveDataToStorage();
+        renderSantriTable();
+        populateSantriDropdowns();
+        updateStats();
+
+        kirimDataKeGoogleSheets('santri', santriPayload);
+
+        showToast(`Berhasil mendaftarkan santri: ${nama}`, 'success');
+        document.getElementById('form-pendaftaran').reset();
+        switchTab('data-santri');
+      };
+
+      if (fotoInput.files && fotoInput.files[0]) {
+        compressImage(fotoInput.files[0], 400, 400, 0.6, function(compressedBase64) {
+          processRegistration(compressedBase64);
+        });
+      } else {
+        processRegistration('');
+      }
+    }
+
+    function renderSantriTable() {
+      const tbody = document.getElementById('tabelSantri');
+      tbody.innerHTML = santriData.length === 0 ? `<tr><td colspan="9" class="p-4 text-center text-slate-400">Belum ada santri terdaftar.</td></tr>` : '';
+      santriData.forEach(santri => {
+        const imgContent = santri.foto ? `<img src="${santri.foto}" class="w-10 h-10 rounded-full object-cover border border-emerald-300 shadow-sm">` : `<div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-user"></i></div>`;
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-2 text-center cursor-pointer" onclick="triggerGantiFoto('${santri.id}')">${imgContent}</td>
+          <td class="p-3 font-mono font-medium text-emerald-800">${santri.id}</td>
+          <td class="p-3 font-semibold text-slate-800">${santri.nama}<br><span class="text-[10px] text-slate-500 font-mono">NIK: ${santri.nik || '-'}</span></td>
+          <td class="p-3 text-slate-600">${santri.tempatLahir || '-'}<br>${santri.tglLahir || '-'}</td>
+          <td class="p-3 text-slate-600">${santri.tglMasuk || '-'}</td>
+          <td class="p-3 text-slate-700 font-medium">${santri.kompleks || '-'}<br><span class="text-[11px] text-emerald-700">${santri.kamar}</span></td>
+          <td class="p-3 text-slate-600">${santri.alamat || '-'}</td>
+          <td class="p-3 text-slate-600">${santri.wali}<br><span class="text-[11px] text-emerald-700 font-semibold">${santri.hp || '-'}</span></td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="bukaModalEditSantri('${santri.id}')" class="text-amber-600 hover:text-amber-800 p-1" title="Edit Data"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="bukaKtsModal('${santri.id}')" class="text-emerald-700 hover:text-emerald-900 p-1" title="Cetak KTS"><i class="fa-solid fa-id-card"></i></button>
+            <button onclick="kirimWaLaporanSantri('${santri.id}')" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusSantri('${santri.id}')" class="text-rose-600 hover:text-rose-800 p-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function bukaModalEditSantri(id) {
+      const santri = santriData.find(s => s.id === id);
+      if (!santri) return;
+      document.getElementById('editSantriId').value = santri.id;
+      document.getElementById('editSantriNama').value = santri.nama || '';
+      document.getElementById('editSantriNik').value = santri.nik || '';
+      document.getElementById('editSantriTempatLahir').value = santri.tempatLahir || '';
+      document.getElementById('editSantriTglLahir').value = santri.tglLahir || '';
+      document.getElementById('editSantriKompleks').value = santri.kompleks || '';
+      document.getElementById('editSantriKamar').value = santri.kamar || '';
+      document.getElementById('editSantriWali').value = santri.wali || '';
+      document.getElementById('editSantriHp').value = santri.hp || '';
+      document.getElementById('editSantriAlamat').value = santri.alamat || '';
+      document.getElementById('modalEditSantri').classList.remove('hidden');
+    }
+
+    function closeModalEditSantri() { document.getElementById('modalEditSantri').classList.add('hidden'); }
+
+    function handleSaveEditSantri(e) {
+      e.preventDefault();
+      const id = document.getElementById('editSantriId').value;
+      const santri = santriData.find(s => s.id === id);
+      if (santri) {
+        santri.nama = document.getElementById('editSantriNama').value.trim();
+        santri.nik = document.getElementById('editSantriNik').value.trim();
+        santri.tempatLahir = document.getElementById('editSantriTempatLahir').value.trim();
+        santri.tglLahir = document.getElementById('editSantriTglLahir').value.trim();
+        santri.kompleks = document.getElementById('editSantriKompleks').value.trim();
+        santri.kamar = document.getElementById('editSantriKamar').value.trim();
+        santri.wali = document.getElementById('editSantriWali').value.trim();
+        santri.hp = document.getElementById('editSantriHp').value.trim();
+        santri.alamat = document.getElementById('editSantriAlamat').value.trim();
+        saveDataToStorage();
+        renderSantriTable();
+        closeModalEditSantri();
+        showToast(`Data santri ${santri.nama} berhasil diperbarui!`, 'success');
+      }
+    }
+
+    function triggerGantiFoto(id) {
+      currentSantriIdForPhoto = id;
+      document.getElementById('inputFotoSantriTabel').click();
+    }
+
+    function prosesGantiFotoTabel(event) {
+      const file = event.target.files[0];
+      if (file && currentSantriIdForPhoto) {
+        compressImage(file, 400, 400, 0.6, function(compressedBase64) {
+          const target = santriData.find(s => s.id === currentSantriIdForPhoto);
+          if (target) {
+            target.foto = compressedBase64;
+            saveDataToStorage();
+            renderSantriTable();
+            showToast('Foto santri diperbarui!', 'success');
+          }
+        });
+      }
+    }
+
+    function hapusSantri(id) {
+      if (confirm(`Hapus santri ID ${id}?`)) {
+        santriData = santriData.filter(s => s.id !== id);
+        saveDataToStorage(); renderSantriTable(); populateSantriDropdowns(); updateStats(); showToast('Santri dihapus.', 'info');
+      }
+    }
+
+    function kirimWaLaporanSantri(id) {
+      const santri = santriData.find(s => s.id === id);
+      if (!santri || !santri.hp) return showToast('Nomor HP Wali tidak tersedia.', 'error');
+      const cleanHp = formatWaNumber(santri.hp);
+      const pesan = `Assalamu'alaikum Warahmatullah, Bpk/Ibu ${santri.wali}. Informasi Santri PON. PES Miftahul Ulum:%0ANama: ${santri.nama} (${santri.id})%0AKamar: ${santri.kamar}%0AStatus: Terdaftar Aktif. Terima kasih.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function formatWaNumber(hp) {
+      let num = hp.replace(/[^0-9]/g, '');
+      if (num.startsWith('0')) num = '62' + num.slice(1);
+      return num;
+    }
+
+    function handlePembayaran(e) {
+      e.preventDefault();
+      const nama = document.getElementById('payNama').value;
+      const jenis = document.getElementById('payJenis').value;
+      const nominal = parseInt(document.getElementById('payNominal').value) || 0;
+      const status = document.getElementById('payStatus').value;
+      if (!nama) return showToast('Daftarkan santri dulu.', 'error');
+
+      const idTrx = 'TRX-' + (trxCounter++);
+      const trxPayload = { idTrx, nama, jenis, nominal, status };
+
+      pembayaranData.push(trxPayload);
+      saveDataToStorage(); 
+      renderPembayaranTable(); 
+      updateStats();
+
+      kirimDataKeGoogleSheets('pembayaran', trxPayload);
+
+      showToast(`Transaksi ${idTrx} dicatat.`, 'success');
+      document.getElementById('payNominal').value = '';
+    }
+
+    function renderPembayaranTable() {
+      const tbody = document.getElementById('tabelPembayaran');
+      tbody.innerHTML = pembayaranData.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada transaksi.</td></tr>` : '';
+      pembayaranData.forEach(trx => {
+        const badge = trx.status === 'Lunas' ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Lunas</span>' : '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Belum Lunas</span>';
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-3 font-mono font-medium text-emerald-800">${trx.idTrx}</td>
+          <td class="p-3 font-semibold text-slate-800">${trx.nama}</td>
+          <td class="p-3 text-slate-600">${trx.jenis}</td>
+          <td class="p-3 font-semibold text-slate-700">Rp ${trx.nominal.toLocaleString('id-ID')}</td>
+          <td class="p-3">${badge}</td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="bukaStrukModal('${trx.idTrx}')" class="text-emerald-700 hover:text-emerald-900 p-1" title="Cetak Struk"><i class="fa-solid fa-print"></i></button>
+            <button onclick="kirimWaPembayaran('${trx.idTrx}')" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusPembayaran('${trx.idTrx}')" class="text-rose-600 hover:text-rose-800 p-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function bukaStrukModal(idTrx) {
+      const trx = pembayaranData.find(t => t.idTrx === idTrx);
+      if (!trx) return;
+      document.getElementById('stTrx').textContent = trx.idTrx;
+      document.getElementById('stNama').textContent = trx.nama;
+      document.getElementById('stJenis').textContent = trx.jenis;
+      document.getElementById('stNominal').textContent = `Rp ${trx.nominal.toLocaleString('id-ID')}`;
+      document.getElementById('stStatus').textContent = trx.status;
+      document.getElementById('modalCetakStruk').classList.remove('hidden');
+    }
+
+    function closeStrukModal() { document.getElementById('modalCetakStruk').classList.add('hidden'); }
+
+    function kirimWaPembayaran(idTrx) {
+      const trx = pembayaranData.find(t => t.idTrx === idTrx);
+      if (!trx) return;
+      const santri = santriData.find(s => s.nama === trx.nama);
+      if (!santri || !santri.hp) return showToast('Nomor WA Wali tidak ditemukan.', 'error');
+      const cleanHp = formatWaNumber(santri.hp);
+      const pesan = `Assalamu'alaikum, Bpk/Ibu ${santri.wali}. Kwitansi Pembayaran PON. PES Miftahul Ulum:%0ANo. Trx: ${trx.idTrx}%0ASantri: ${trx.nama}%0AJenis: ${trx.jenis}%0ANominal: Rp ${trx.nominal.toLocaleString('id-ID')}%0AStatus: *${trx.status}*. Terima kasih.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function hapusPembayaran(idTrx) {
+      if (confirm(`Hapus transaksi ${idTrx}?`)) {
+        pembayaranData = pembayaranData.filter(t => t.idTrx !== idTrx);
+        saveDataToStorage(); renderPembayaranTable(); updateStats(); showToast('Transaksi dihapus.', 'info');
+      }
+    }
+
+    function handlePerizinan(e) {
+      e.preventDefault();
+      const nama = document.getElementById('izinSantri').value;
+      const alasan = document.getElementById('izinAlasan').value.trim();
+      const tglKeluar = document.getElementById('izinTglKeluar').value;
+      const tglKembali = document.getElementById('izinTglKembali').value;
+      if (!nama) return showToast('Pilih santri dahulu.', 'error');
+
+      perizinanData.push({ nama, alasan, tglKeluar, tglKembali, status: 'Izin Aktif' });
+      saveDataToStorage(); renderPerizinanTable();
+      showToast('Surat izin diterbitkan.', 'success');
+      document.getElementById('form-perizinan').reset();
+    }
+
+    function renderPerizinanTable() {
+      const tbody = document.getElementById('tabelPerizinan');
+      tbody.innerHTML = perizinanData.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada riwayat perizinan.</td></tr>` : '';
+      perizinanData.forEach((p, idx) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-3 font-semibold text-slate-800">${p.nama}</td>
+          <td class="p-3 text-slate-600">${p.alasan}</td>
+          <td class="p-3 text-slate-600">${p.tglKeluar}</td>
+          <td class="p-3 text-slate-600 font-medium">${p.tglKembali}</td>
+          <td class="p-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full">${p.status}</span></td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="kirimWaIzin(${idx})" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusIzin(${idx})" class="text-rose-600 hover:text-rose-800 p-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function kirimWaIzin(idx) {
+      const p = perizinanData[idx];
+      const santri = santriData.find(s => s.nama === p.nama);
+      if (!santri || !santri.hp) return showToast('Nomor WA Wali tidak ditemukan.', 'error');
+      const cleanHp = formatWaNumber(santri.hp);
+      const pesan = `PEMBERITAHUAN IZIN SANTRI - PON. PES MIFTAHUL ULUM:%0ANama: ${p.nama}%0AAlasan: ${p.alasan}%0ATgl Keluar: ${p.tglKeluar}%0ABatas Kembali: ${p.tglKembali}%0AHarapkan kembali tepat waktu. Terima kasih.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function hapusIzin(idx) {
+      perizinanData.splice(idx, 1); saveDataToStorage(); renderPerizinanTable(); showToast('Izin dihapus.', 'info');
+    }
+
+    function handleHafalan(e) {
+      e.preventDefault();
+      const nama = document.getElementById('hafalanSantri').value;
+      const kategori = document.getElementById('hafalanKategori').value;
+      const capaian = document.getElementById('hafalanCapaian').value.trim();
+      const tgl = new Date().toLocaleDateString('id-ID');
+      if (!nama) return showToast('Pilih santri terlebih dahulu.', 'error');
+
+      hafalanData.push({ tgl, nama, kategori, capaian });
+      saveDataToStorage(); renderHafalanTable();
+      showToast(`Prestasi / Hafalan ${nama} dicatat.`, 'success');
+      document.getElementById('hafalanCapaian').value = '';
+    }
+
+    function renderHafalanTable() {
+      const tbody = document.getElementById('tabelHafalan');
+      tbody.innerHTML = hafalanData.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada rincian prestasi.</td></tr>` : '';
+      hafalanData.forEach((h, idx) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-3 text-slate-500 text-xs">${h.tgl}</td>
+          <td class="p-3 font-semibold text-slate-800">${h.nama}</td>
+          <td class="p-3 text-emerald-800 font-medium">${h.kategori}</td>
+          <td class="p-3 text-slate-700">${h.capaian}</td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="kirimWaHafalan(${idx})" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusHafalan(${idx})" class="text-rose-600 hover:text-rose-800 p-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function kirimWaHafalan(idx) {
+      const h = hafalanData[idx];
+      const santri = santriData.find(s => s.nama === h.nama);
+      if (!santri || !santri.hp) return showToast('Nomor WA Wali tidak ditemukan.', 'error');
+      const cleanHp = formatWaNumber(santri.hp);
+      const pesan = `LAPORAN PRESTASI SANTRI - PON. PES MIFTAHUL ULUM:%0ANama: ${h.nama}%0AKategori: ${h.kategori}%0ACapaian: ${h.capaian}%0ATanggal: ${h.tgl}%0AAlhamdulillah, mohon doa restunya.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function hapusHafalan(idx) { hafalanData.splice(idx, 1); saveDataToStorage(); renderHafalanTable(); showToast('Catatan dihapus.', 'info'); }
+
+    function handlePelanggaran(e) {
+      e.preventDefault();
+      const nama = document.getElementById('pelanggaranSantri').value;
+      const deskripsi = document.getElementById('pelanggaranDeskripsi').value.trim();
+      const poin = parseInt(document.getElementById('pelanggaranPoin').value) || 0;
+      const tazir = document.getElementById('pelanggaranTazir').value.trim();
+      const tgl = new Date().toLocaleDateString('id-ID');
+      if (!nama) return showToast('Pilih santri dahulu.', 'error');
+
+      pelanggaranData.push({ tgl, nama, deskripsi, poin, tazir });
+      saveDataToStorage(); renderPelanggaranTable();
+      showToast(`Pelanggaran ${nama} dicatat.`, 'success');
+      document.getElementById('pelanggaranDeskripsi').value = '';
+      document.getElementById('pelanggaranPoin').value = '';
+      document.getElementById('pelanggaranTazir').value = '';
+    }
+
+    function renderPelanggaranTable() {
+      const tbody = document.getElementById('tabelPelanggaran');
+      tbody.innerHTML = pelanggaranData.length === 0 ? `<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada pelanggaran.</td></tr>` : '';
+      pelanggaranData.forEach((p, idx) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-3 text-slate-500 text-xs">${p.tgl}</td>
+          <td class="p-3 font-semibold text-slate-800">${p.nama}</td>
+          <td class="p-3 text-rose-700 font-medium">${p.deskripsi}</td>
+          <td class="p-3"><span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded">${p.poin} Poin</span></td>
+          <td class="p-3 text-slate-700">${p.tazir}</td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="kirimWaPelanggaran(${idx})" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusPelanggaran(${idx})" class="text-rose-600 hover:text-rose-800 p-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function kirimWaPelanggaran(idx) {
+      const p = pelanggaranData[idx];
+      const santri = santriData.find(s => s.nama === p.nama);
+      if (!santri || !santri.hp) return showToast('Nomor WA Wali tidak ditemukan.', 'error');
+      const cleanHp = formatWaNumber(santri.hp);
+      const pesan = `PEMBERITAHUAN KEDISIPLINAN SANTRI - PON. PES MIFTAHUL ULUM:%0ANama: ${p.nama}%0APelanggaran: ${p.deskripsi}%0APoin: ${p.poin}%0ATindakan (Ta'zir): ${p.tazir}%0ATanggal: ${p.tgl}%0AMohon bimbingannya bersama. Terima kasih.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function hapusPelanggaran(idx) { pelanggaranData.splice(idx, 1); saveDataToStorage(); renderPelanggaranTable(); showToast('Pelanggaran dihapus.', 'info'); }
+
+    function handlePengajar(e) {
+      e.preventDefault();
+      const nama = document.getElementById('pengajarNama').value.trim();
+      const mapel = document.getElementById('pengajarMapel').value.trim();
+      const pendidikan = document.getElementById('pengajarPendidikan').value.trim();
+      const hp = document.getElementById('pengajarHp').value.trim();
+
+      pengajarData.push({ nama, mapel, pendidikan, hp });
+      saveDataToStorage();
+      renderPengajarTable();
+      showToast(`Tenaga pengajar ${nama} berhasil ditambahkan!`, 'success');
+      document.getElementById('form-pengajar').reset();
+    }
+
+    function renderPengajarTable() {
+      const tbody = document.getElementById('tabelPengajar');
+      tbody.innerHTML = pengajarData.length === 0 ? `<tr><td colspan="5" class="p-4 text-center text-slate-400">Belum ada data pengajar.</td></tr>` : '';
+      pengajarData.forEach((p, idx) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-50 transition';
+        row.innerHTML = `
+          <td class="p-3 font-semibold text-slate-800">${p.nama}</td>
+          <td class="p-3 text-emerald-800 font-medium">${p.mapel}</td>
+          <td class="p-3 text-slate-600">${p.pendidikan}</td>
+          <td class="p-3 text-slate-600 font-mono">${p.hp}</td>
+          <td class="p-3 text-center space-x-1">
+            <button onclick="kirimWaPengajar(${idx})" class="text-emerald-600 hover:text-emerald-800 p-1" title="Kirim WA"><i class="fa-brands fa-whatsapp font-bold text-sm"></i></button>
+            <button onclick="hapusPengajar(${idx})" class="text-rose-600 hover:text-rose-800 p-1" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function kirimWaPengajar(idx) {
+      const p = pengajarData[idx];
+      if (!p || !p.hp) return showToast('Nomor HP tidak valid.', 'error');
+      const cleanHp = formatWaNumber(p.hp);
+      const pesan = `Assalamu'alaikum Ustaz/Ustazah ${p.nama}. Informasi Kontak Tenaga Pengajar PON. PES Miftahul Ulum.`;
+      window.open(`https://wa.me/${cleanHp}?text=${pesan}`, '_blank');
+    }
+
+    function hapusPengajar(idx) {
+      if (confirm('Hapus data tenaga pengajar ini?')) {
+        pengajarData.splice(idx, 1);
+        saveDataToStorage();
+        renderPengajarTable();
+        showToast('Data pengajar dihapus.', 'info');
+      }
+    }
+
+    function renderPengurusView() {
+      document.getElementById('nama-pengasuh').textContent = pengurusData.pengasuh.nama;
+      document.getElementById('nama-pengurus').textContent = pengurusData.pengurus.nama;
+      document.getElementById('nama-sekretaris').textContent = pengurusData.sekretaris.nama;
+      document.getElementById('nama-bendahara').textContent = pengurusData.bendahara.nama;
+
+      ['pengasuh', 'pengurus', 'sekretaris', 'bendahara'].forEach(role => {
+        const imgEl = document.getElementById(`img-${role}`);
+        const iconEl = document.getElementById(`icon-${role}`);
+        if (pengurusData[role].foto) {
+          imgEl.src = pengurusData[role].foto;
+          imgEl.classList.remove('hidden');
+          iconEl.classList.add('hidden');
+        } else {
+          imgEl.classList.add('hidden');
+          iconEl.classList.remove('hidden');
+        }
+      });
+    }
+
+    function bukaModalEditPengurus() {
+      document.getElementById('editNamaPengasuh').value = pengurusData.pengasuh.nama;
+      document.getElementById('editNamaPengurus').value = pengurusData.pengurus.nama;
+      document.getElementById('editNamaSekretaris').value = pengurusData.sekretaris.nama;
+      document.getElementById('editNamaBendahara').value = pengurusData.bendahara.nama;
+      document.getElementById('modalEditPengurus').classList.remove('hidden');
+    }
+
+    function closeModalEditPengurus() { document.getElementById('modalEditPengurus').classList.add('hidden'); }
+
+    function handleSavePengurus(e) {
+      e.preventDefault();
+      pengurusData.pengasuh.nama = document.getElementById('editNamaPengasuh').value.trim();
+      pengurusData.pengurus.nama = document.getElementById('editNamaPengurus').value.trim();
+      pengurusData.sekretaris.nama = document.getElementById('editNamaSekretaris').value.trim();
+      pengurusData.bendahara.nama = document.getElementById('editNamaBendahara').value.trim();
+
+      saveDataToStorage(); renderPengurusView(); closeModalEditPengurus();
+      showToast('Struktur pengurus berhasil diperbarui!', 'success');
+    }
+
+    function triggerGantiFotoPengurus(role) {
+      currentPengurusRoleForPhoto = role;
+      document.getElementById('inputFotoPengurus').click();
+    }
+
+    function prosesGantiFotoPengurus(event) {
+      const file = event.target.files[0];
+      if (file && currentPengurusRoleForPhoto) {
+        compressImage(file, 400, 400, 0.6, function(compressedBase64) {
+          pengurusData[currentPengurusRoleForPhoto].foto = compressedBase64;
+          saveDataToStorage();
+          renderPengurusView();
+          showToast('Foto pengurus berhasil diperbarui!', 'success');
+        });
+      }
+    }
+
+    function exportToCSV(type) {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      if (type === 'santri') {
+        csvContent += "ID Santri,Nama Santri,NIK,Jenis Kelamin,Tempat Lahir,Tanggal Lahir,Tanggal Masuk,Kompleks,Kamar,Alamat,Wali,No HP\n";
+        santriData.forEach(s => {
+          csvContent += `"${s.id}","${s.nama}","${s.nik}","${s.jk}","${s.tempatLahir}","${s.tglLahir}","${s.tglMasuk}","${s.kompleks}","${s.kamar}","${s.alamat}","${s.wali}","${s.hp}"\n`;
+        });
+      } else {
+        csvContent += "ID Transaksi,Nama Santri,Jenis Pembayaran,Nominal,Status\n";
+        pembayaranData.forEach(p => {
+          csvContent += `"${p.idTrx}","${p.nama}","${p.jenis}","${p.nominal}","${p.status}"\n`;
+        });
+      }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `laporan_${type}_miftahul_ulum.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function bukaKtsModal(id) {
+      const santri = santriData.find(s => s.id === id);
+      if (!santri) return;
+      document.getElementById('ktsId').textContent = `ID: ${santri.id}`;
+      document.getElementById('ktsNama').textContent = santri.nama;
+      document.getElementById('ktsTtl').textContent = `${santri.tempatLahir || '-'}, ${santri.tglLahir || '-'}`;
+      document.getElementById('ktsKamar').textContent = `${santri.kompleks || '-'} (${santri.kamar})`;
+      document.getElementById('ktsMasuk').textContent = santri.tglMasuk || '-';
+
+      const fotoEl = document.getElementById('ktsFoto');
+      const iconEl = document.getElementById('ktsIcon');
+      if (santri.foto) {
+        fotoEl.src = santri.foto; fotoEl.classList.remove('hidden'); iconEl.classList.add('hidden');
+      } else {
+        fotoEl.classList.add('hidden'); iconEl.classList.remove('hidden');
+      }
+      document.getElementById('modalCetakKTS').classList.remove('hidden');
+    }
+
+    function closeKtsModal() { document.getElementById('modalCetakKTS').classList.add('hidden'); }
+
+    function filterSantri() {
+      const query = document.getElementById('searchSantri').value.toLowerCase();
+      document.querySelectorAll('#tabelSantri tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none');
+    }
+
+    function filterPembayaran() {
+      const query = document.getElementById('searchPembayaran').value.toLowerCase();
+      document.querySelectorAll('#tabelPembayaran tr').forEach(r => r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none');
+    }
+
+    function populateSantriDropdowns() {
+      const selects = [
+        document.getElementById('payNama'),
+        document.getElementById('hafalanSantri'),
+        document.getElementById('pelanggaranSantri'),
+        document.getElementById('izinSantri')
+      ];
+      selects.forEach(select => {
+        if (!select) return;
+        select.innerHTML = santriData.length === 0 ? `<option value="">-- Tidak Ada Santri --</option>` : '';
+        santriData.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.nama;
+          opt.textContent = `${s.nama} (${s.kamar})`;
+          select.appendChild(opt);
+        });
+      });
+    }
+
+    function updateStats() {
+      const totalLunas = pembayaranData.filter(t => t.status === 'Lunas').reduce((sum, t) => sum + t.nominal, 0);
+      const totalPending = pembayaranData.filter(t => t.status === 'Belum Lunas').reduce((sum, t) => sum + t.nominal, 0);
+      document.getElementById('stat-total-lunas').textContent = `Rp ${totalLunas.toLocaleString('id-ID')}`;
+      document.getElementById('stat-total-pending').textContent = `Rp ${totalPending.toLocaleString('id-ID')}`;
+      document.getElementById('stat-total-santri').textContent = `${santriData.length} Santri`;
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').textContent = msg;
+      toast.className = `mb-4 p-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-between shadow-sm `;
+      if (type === 'success') toast.classList.add('bg-emerald-100', 'text-emerald-800', 'border', 'border-emerald-300');
+      else if (type === 'error') toast.classList.add('bg-rose-100', 'text-rose-800', 'border', 'border-rose-300');
+      else toast.classList.add('bg-blue-100', 'text-blue-800', 'border', 'border-blue-300');
+      toast.classList.remove('hidden');
+      setTimeout(() => closeToast(), 4000);
+    }
+
+    function closeToast() { document.getElementById('toast-notification').classList.add('hidden'); }
+  </script>
+</body>
+</html>
